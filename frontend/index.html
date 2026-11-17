@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Car Price Prediction | AI Valuation</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+
+        :root {
+            --graphite: #14171C;
+            --graphite-panel: #1C2027;
+            --graphite-line: #2B303A;
+            --off-white: #F4F5F7;
+            --amber: #E8A33D;
+            --steel: #5B7A99;
+            --red: #C1443B;
+            --muted: #8A93A3;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--graphite);
+            color: var(--off-white);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
+        }
+
+        .display {
+            font-family: 'Oswald', sans-serif;
+        }
+
+        .shell {
+            width: 100%;
+            max-width: 760px;
+            background: var(--graphite-panel);
+            border: 1px solid var(--graphite-line);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+        }
+
+        .shell-header {
+            padding: 32px 40px 24px;
+            border-bottom: 1px solid var(--graphite-line);
+            background: linear-gradient(180deg, rgba(232,163,61,0.06), transparent);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--amber);
+            margin-bottom: 14px;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--amber);
+            box-shadow: 0 0 8px var(--amber);
+        }
+
+        h1 {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 32px;
+            letter-spacing: 0.01em;
+            margin: 0 0 8px;
+            color: var(--off-white);
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .body-pad {
+            padding: 32px 40px 40px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            background: var(--graphite);
+            border: 1px solid var(--graphite-line);
+            border-radius: 8px;
+            padding: 11px 12px;
+            color: var(--off-white);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.15s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--amber);
+        }
+
+        .model-select-wrap {
+            margin-bottom: 28px;
+            padding: 16px;
+            background: rgba(91,122,153,0.08);
+            border: 1px solid var(--graphite-line);
+            border-radius: 10px;
+        }
+
+        .model-select-wrap .field-label {
+            color: var(--steel);
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        @media (max-width: 560px) {
+            .spec-grid { grid-template-columns: 1fr; }
+            .shell-header, .body-pad { padding-left: 24px; padding-right: 24px; }
+        }
+
+        .predict-btn {
+            margin-top: 30px;
+            width: 100%;
+            background: var(--amber);
+            color: var(--graphite);
+            border: none;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+
+        .predict-btn:hover {
+            background: #f0b356;
+        }
+
+        .predict-btn:active {
+            transform: scale(0.99);
+        }
+
+        /* ===== Result / Gauge signature element ===== */
+
+        .result-panel {
+            margin-top: 32px;
+            padding: 28px;
+            background: var(--graphite);
+            border: 1px solid var(--graphite-line);
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .result-label {
+            font-family: 'Oswald', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        .gauge-wrap {
+            position: relative;
+            width: 220px;
+            height: 120px;
+            margin: 0 auto;
+        }
+
+        .gauge-wrap svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        #predictedPrice {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 30px;
+            color: var(--off-white);
+            margin: 6px 0 4px;
+        }
+
+        #selectedModel {
+            font-size: 13px;
+            color: var(--steel);
+            margin: 0;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="shell">
+
+    <div class="shell-header">
+
+        <div class="eyebrow">AI-Powered Valuation</div>
+
+        <h1>Car Price Predictor</h1>
+
+        <p class="subtitle">Estimate used-car selling price from spec sheet inputs, across seven trained models.</p>
+
+    </div>
+
+
+    <div class="body-pad">
+
+        <!-- Model Selection -->
+
+        <div class="model-select-wrap">
+
+            <label class="field-label" for="algorithm">Prediction Model</label>
+
+            <select id="algorithm">
+
+                <option value="optimized_catboost">Optimized CatBoost</option>
+                <option value="catboost">CatBoost</option>
+                <option value="xgboost">XGBoost</option>
+                <option value="random_forest">Random Forest</option>
+                <option value="gradient_boosting">Gradient Boosting</option>
+                <option value="decision_tree">Decision Tree</option>
+                <option value="linear_regression">Linear Regression</option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Spec Sheet Inputs -->
+
+        <div class="spec-grid">
+
+            <div>
+                <label class="field-label" for="car_name">Car Name</label>
+                <input id="car_name" type="text" value="Maruti Alto">
+            </div>
+
+            <div>
+                <label class="field-label" for="brand">Brand</label>
+                <input id="brand" type="text" value="Maruti">
+            </div>
+
+            <div>
+                <label class="field-label" for="car_model">Model</label>
+                <input id="car_model" type="text" value="Alto">
+            </div>
+
+            <div>
+                <label class="field-label" for="vehicle_age">Vehicle Age (years)</label>
+                <input id="vehicle_age" type="number" value="9">
+            </div>
+
+            <div>
+                <label class="field-label" for="km_driven">Kilometers Driven</label>
+                <input id="km_driven" type="number" value="120000">
+            </div>
+
+            <div>
+                <label class="field-label" for="seller_type">Seller Type</label>
+                <select id="seller_type">
+                    <option value="Individual">Individual</option>
+                    <option value="Dealer">Dealer</option>
+                    <option value="Trustmark Dealer">Trustmark Dealer</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="field-label" for="fuel_type">Fuel Type</label>
+                <select id="fuel_type">
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="CNG">CNG</option>
+                    <option value="LPG">LPG</option>
+                    <option value="Electric">Electric</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="field-label" for="transmission_type">Transmission</label>
+                <select id="transmission_type">
+                    <option value="Manual">Manual</option>
+                    <option value="Automatic">Automatic</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="field-label" for="mileage">Mileage (kmpl)</label>
+                <input id="mileage" type="number" step="0.1" value="19.7">
+            </div>
+
+            <div>
+                <label class="field-label" for="engine">Engine (cc)</label>
+                <input id="engine" type="number" value="796">
+            </div>
+
+            <div>
+                <label class="field-label" for="max_power">Max Power (bhp)</label>
+                <input id="max_power" type="number" step="0.1" value="46.3">
+            </div>
+
+            <div>
+                <label class="field-label" for="seats">Seats</label>
+                <input id="seats" type="number" value="5">
+            </div>
+
+        </div>
+
+
+        <!-- Button -->
+
+        <button type="button" id="predictButton" class="predict-btn">
+            Run Prediction
+        </button>
+
+
+        <!-- Result -->
+
+        <div class="result-panel">
+
+            <div class="result-label">Estimated Selling Price</div>
+
+            <div class="gauge-wrap">
+                <svg viewBox="0 0 220 120">
+                    <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="#2B303A" stroke-width="14" stroke-linecap="round"/>
+                    <path id="gaugeArc" d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="#E8A33D" stroke-width="14" stroke-linecap="round"
+                        stroke-dasharray="283" stroke-dashoffset="283"/>
+                </svg>
+            </div>
+
+            <p id="predictedPrice">—</p>
+
+            <p id="selectedModel"></p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="script.js"></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+# Virtual Environment
+venv/
+.venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Environment Variables
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary Files
+*.log
+.DS_Store
+Thumbs.db
+
+# Old Git repository backup
+.git_old_backup/
